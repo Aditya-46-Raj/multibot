@@ -5,7 +5,7 @@ from tkinter import filedialog
 from fpdf import FPDF
 
 # Set up Gemini API (Replace 'YOUR_API_KEY' with your actual key)
-API_KEY = 'YOUR_API_KEY'
+API_KEY = 'AIzaSyChYlxk_Up5AQJO5jJN886gje9gOhTFjzg'
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={API_KEY}"
 
 # Bot Presets
@@ -16,6 +16,7 @@ BOT_PRESETS = {
     "study partner": "Act as a helpful study companion, explaining concepts clearly."
 }
 
+# Function to send user input to the Gemini API and display response
 def send_message():
     user_input = input_text.get("1.0", END).strip()
     if not user_input:
@@ -44,6 +45,7 @@ def send_message():
         output_text.insert(END, "Error: " + str(e))
         output_text.config(state=DISABLED)
 
+# Function to save selected text to notes
 def save_notes():
     selected_text = output_text.get(SEL_FIRST, SEL_LAST) if output_text.tag_ranges(SEL) else ""
     if not selected_text:
@@ -51,12 +53,13 @@ def save_notes():
     
     notes_text.insert(END, selected_text + "\n")
 
+# Function to save final notes as a PDF
 def save_final_notes():
     notes = notes_text.get("1.0", END).strip()
     if not notes:
         return
     
-    file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
+    file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[["PDF files", "*.pdf"]])
     if file_path:
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
@@ -67,49 +70,72 @@ def save_final_notes():
 
 # UI Setup
 win = Tk()
-win.geometry("800x600")
 win.title("AI Chatbot")
-win.config(bg='lightgray')
+win.state("zoomed")  # Start in fullscreen mode
+win.configure(bg="#34495E")  # Darker background for better contrast
 
-# Input Panel (Left) - Split into two segments
-input_frame = Frame(win, bg="white", padx=10, pady=10)
-input_frame.place(x=10, y=10, width=380, height=540)
+# Configure grid for dynamic resizing
+win.columnconfigure(0, weight=1)
+win.columnconfigure(1, weight=1)
+win.rowconfigure(0, weight=1)
 
-# Upper segment for notes (3/5 of total height)
-notes_frame = Frame(input_frame, bg="white")
-notes_frame.place(x=0, y=0, width=360, height=324)
-Label(notes_frame, text="Notes Section:", bg="white").pack(anchor=W)
-notes_text = Text(notes_frame, wrap=WORD, height=15, width=50)
-notes_text.pack()
+# Styling
+frame_bg = "#ECF0F1"
+border_color = "#BDC3C7"
+button_bg = "#2980B9"
+button_fg = "white"
+text_font = ("Arial", 12)
+button_font = ("Arial", 10, "bold")
 
-# Lower segment for user input (2/5 of total height)
-user_input_frame = Frame(input_frame, bg="white")
-user_input_frame.place(x=0, y=330, width=360, height=216)
-Label(user_input_frame, text="User Input:", bg="white").pack(anchor=W)
-input_text = Text(user_input_frame, wrap=WORD, height=5, width=50)
-input_text.pack()
+# Main Frame for Resizable Layout
+main_frame = Frame(win)
+main_frame.pack(fill=BOTH, expand=True)
+main_frame.columnconfigure(0, weight=1)
+main_frame.columnconfigure(1, weight=1)
+main_frame.rowconfigure(0, weight=1)
 
-# Output Panel (Right)
-output_frame = Frame(win, bg="white", padx=10, pady=10)
-output_frame.place(x=410, y=10, width=380, height=540)
-Label(output_frame, text="AI Response:", bg="white").pack(anchor=W)
-output_text = Text(output_frame, wrap=WORD, height=25, width=50, state=DISABLED)
-output_text.pack()
+# Left Panel: User Input and AI Response
+left_panel = Frame(main_frame, bg=frame_bg, padx=10, pady=10, bd=2, relief=RIDGE)
+left_panel.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+left_panel.columnconfigure(0, weight=1)
+left_panel.rowconfigure(1, weight=1)
+left_panel.rowconfigure(3, weight=1)
 
-# Buttons
-send_button = Button(win, text="Send", command=send_message, bg="lightblue", height=2, width=15)
-send_button.place(x=200, y=560)
+Label(left_panel, text="AI Response:", font=("Arial", 14, "bold"), bg=frame_bg).grid(row=0, column=0, sticky="w")
+output_text = Text(left_panel, wrap=WORD, state=DISABLED, font=text_font, bd=2, relief=SOLID, highlightbackground=border_color, highlightthickness=1)
+output_text.grid(row=1, column=0, sticky="nsew")
 
-save_button = Button(win, text="Save Notes", command=save_notes, bg="lightgreen", height=2, width=15)
-save_button.place(x=330, y=560)
+Label(left_panel, text="User Input:", font=("Arial", 14, "bold"), bg=frame_bg).grid(row=2, column=0, sticky="w")
+input_text = Text(left_panel, wrap=WORD, font=text_font, bd=2, relief=SOLID, height=4, highlightbackground=border_color, highlightthickness=1)
+input_text.grid(row=3, column=0, sticky="nsew")
 
-final_notes_button = Button(win, text="Final Notes", command=save_final_notes, bg="orange", height=2, width=15)
-final_notes_button.place(x=460, y=560)
+# Right Panel: Notes Section
+right_panel = Frame(main_frame, bg=frame_bg, padx=10, pady=10, bd=2, relief=RIDGE)
+right_panel.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+right_panel.columnconfigure(0, weight=1)
+right_panel.rowconfigure(1, weight=1)
 
-# Dropdown menu for bot selection
+Label(right_panel, text="Notes Section:", font=("Arial", 14, "bold"), bg=frame_bg).grid(row=0, column=0, sticky="w")
+notes_text = Text(right_panel, wrap=WORD, font=text_font, bd=2, relief=SOLID, highlightbackground=border_color, highlightthickness=1)
+notes_text.grid(row=1, column=0, sticky="nsew")
+
+# Buttons & Dropdown
+button_frame = Frame(win, bg="#2C3E50")
+button_frame.pack(fill=X, pady=10)
+
+send_button = Button(button_frame, text="Send", command=send_message, bg=button_bg, fg=button_fg, font=button_font, relief=RAISED, bd=3)
+send_button.pack(side=LEFT, padx=10, pady=5)
+
+save_button = Button(button_frame, text="Save Notes", command=save_notes, bg=button_bg, fg=button_fg, font=button_font, relief=RAISED, bd=3)
+save_button.pack(side=LEFT, padx=10, pady=5)
+
+final_notes_button = Button(button_frame, text="Final Notes", command=save_final_notes, bg=button_bg, fg=button_fg, font=button_font, relief=RAISED, bd=3)
+final_notes_button.pack(side=LEFT, padx=10, pady=5)
+
 bot_selector = StringVar(win)
-bot_selector.set("child")  # Default selection
-bot_menu = OptionMenu(win, bot_selector, *BOT_PRESETS.keys())
-bot_menu.place(x=590, y=560)
+bot_selector.set("child")
+bot_menu = OptionMenu(button_frame, bot_selector, *BOT_PRESETS.keys())
+bot_menu.config(font=button_font, bg=button_bg, fg=button_fg, relief=RAISED, bd=3)
+bot_menu.pack(side=LEFT, padx=10, pady=5)
 
 win.mainloop()
