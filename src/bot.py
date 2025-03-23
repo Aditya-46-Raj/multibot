@@ -5,7 +5,7 @@ from tkinter import filedialog
 from fpdf import FPDF
 
 # Set up Gemini API (Replace 'YOUR_API_KEY' with your actual key)
-API_KEY = 'AIzaSyChYlxk_Up5AQJO5jJN886gje9gOhTFjzg'
+API_KEY = 'YOUR_API_KEY'
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={API_KEY}"
 
 # Bot Presets
